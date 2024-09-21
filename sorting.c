@@ -23,7 +23,7 @@ double calculate_time(clock_t start, clock_t end){
 
 void writeExcel(double* mesT_bub, double* mesT_ins, double* mesT_sel,
                  double* mesT_bub_ord, double* mesT_ins_ord, double* mesT_sel_ord){
-    FILE* f = fopen("testGraphe.txt", "w");
+    FILE* f = fopen("./testGraphe.txt", "w");
     for(int i = 0; i < FIVE; i++){
         fprintf(f, "%f\t%f\t%f\t%f\t%f\t%f\n", mesT_bub[i], mesT_ins[i], mesT_sel[i], 
                     mesT_bub_ord[i], mesT_ins_ord[i], mesT_sel_ord[i]);
@@ -186,7 +186,7 @@ void measure_avg_time(){
     }
 
     //  exprime the results
-    printf("\t\t\t\t\t******* Results *******\nBubble\t\tInsertion\tSelection\t|\tBubble\t\tInsertion\tSelection\n");
+    printf("\t\t\t\t     ******* Results *******\nBubble\t\tInsertion\tSelection\t|\tBubble\t\tInsertion\tSelection\n");
     printf("\t(randomly generated arrays)\t\t|\t\t(reserved ordered arrays)\n");
     for(int i = 0; i < FIVE; i++){
         printf("%f\t%f\t%f\t|\t%f\t%f\t%f\n", mesT_bub[i], mesT_ins[i], mesT_sel[i]
