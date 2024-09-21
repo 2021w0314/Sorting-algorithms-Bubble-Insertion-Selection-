@@ -23,7 +23,7 @@ double calculate_time(clock_t start, clock_t end){
 
 void writeExcel(double* mesT_bub, double* mesT_ins, double* mesT_sel,
                  double* mesT_bub_ord, double* mesT_ins_ord, double* mesT_sel_ord){
-    FILE* f = fopen("/home/guest/Desktop/codes/testGraphe.txt", "w");
+    FILE* f = fopen("testGraphe.txt", "w");
     for(int i = 0; i < FIVE; i++){
         fprintf(f, "%f\t%f\t%f\t%f\t%f\t%f\n", mesT_bub[i], mesT_ins[i], mesT_sel[i], 
                     mesT_bub_ord[i], mesT_ins_ord[i], mesT_sel_ord[i]);
