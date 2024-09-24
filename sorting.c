@@ -41,10 +41,11 @@ void writeExcel(double* mesT_bub, double* mesT_ins, double* mesT_sel,
     a[i] > a[i + 1] 
     and exchange the items a[i] and a[i + 1]
 */
-void bubble_sort(int* array, unsigned int length, int* srtArr_bub){
-    memcpy(srtArr_bub, array, sizeof(int)*length);
+int bubble_sort(int* array, unsigned int length, int* srtArr_bub){
+    // memcpy(srtArr_bub, array, sizeof(int)*length);
     int flag = 1;
     int tmp;
+    int count = 0;
     while(flag){
         flag = 0;
         for(int i = 0; i < length-1; i++){
@@ -53,16 +54,18 @@ void bubble_sort(int* array, unsigned int length, int* srtArr_bub){
                 srtArr_bub[i] = srtArr_bub[i+1];
                 srtArr_bub[i+1] = tmp;
                 flag = 1;
+                count++;
             }
         }
     }
-    return;
+    return count;
 }
 
 //  insertion sort: "Insert key on the proper position in the sorted part"
-void insertion_sort(int* array, unsigned int length, int* srtArr_ins){
-    memcpy(srtArr_ins, array, sizeof(int)*length);
+int insertion_sort(int* array, unsigned int length, int* srtArr_ins){
+    // memcpy(srtArr_ins, array, sizeof(int)*length);
     int j, tmp;
+    int count = 0;
     for(int i = 1; i < length; i++){
         j = i-1;
         while((j >= 0) && (srtArr_ins[j] > srtArr_ins[j+1])){
@@ -70,17 +73,19 @@ void insertion_sort(int* array, unsigned int length, int* srtArr_ins){
             srtArr_ins[j] = srtArr_ins[j+1];
             srtArr_ins[j+1] = tmp;
             j--;
+            count++;
         }
     }
-    return;
+    return count;
 }
 
 /*  selection sort: "Find the minimal element in the rest array, 
     and insert it in the right index of the array befor"
 */
-void selection_sort(int* array, unsigned int length, int* srtArr_sel){
-    memcpy(srtArr_sel, array, sizeof(int)*length);
+int selection_sort(int* array, unsigned int length, int* srtArr_sel){
+    // memcpy(srtArr_sel, array, sizeof(int)*length);
     int min, idx;
+    int count = 0;
     for(int i = 0; i < length - 1; i++){
         min = srtArr_sel[i];
         idx = i;
@@ -92,14 +97,15 @@ void selection_sort(int* array, unsigned int length, int* srtArr_sel){
         }
         srtArr_sel[idx] = srtArr_sel[i];
         srtArr_sel[i] = min;
+        count++;
     }
-    return;
+    return count;
 }
 
 //  *****************   Algo: in descending order  *****************
 //  (by using Insertion sort)
 void insrt_sort_descending(int* array, unsigned int length, int* srtArr_des){
-    memcpy(srtArr_des, array, sizeof(int)*length);
+    // memcpy(srtArr_des, array, sizeof(int)*length);
     int j, tmp;
     for(int i = length-2; i >= 0; i--){
         j = i+1;
@@ -128,9 +134,10 @@ void measure_avg_time(){
     // arrays to store the measure of time 
     double mesT_bub[FIVE], mesT_ins[FIVE], mesT_sel[FIVE];
     double mesT_bub_ord[FIVE], mesT_ins_ord[FIVE], mesT_sel_ord[FIVE];
+    int cnt_bub[FIVE], cnt_ins[FIVE], cnt_sel[FIVE], cnt_res_bub[FIVE], cnt_res_ins[FIVE], cnt_res_sel[FIVE];    //  counter of switchs
 
-    //******* Sorting randomly generated arrays of length L *******
     for(int i = 0; i < FIVE; i++){
+        //******* Sorting randomly generated arrays of length L *******
         lth = arr_L[i];
         int arr_init[lth], arr_tmp1[lth], arr_tmp2[lth], arr_tmp3[lth];
         rand_fill(arr_init, lth);
@@ -141,56 +148,89 @@ void measure_avg_time(){
         // printf("\n");
 
         // ***  Bubble sort  ***
+        memcpy(arr_tmp1, arr_init, sizeof(int)*lth);
         start = clock();
-        bubble_sort(arr_init, lth, arr_tmp1);
+        cnt_bub[i] = bubble_sort(arr_init, lth, arr_tmp1);
         end = clock();
         mesT_bub[i] = calculate_time(start, end);
 
         // ***  Insertion sort  ***
+        memcpy(arr_tmp2, arr_init, sizeof(int)*lth);
         start = clock();
-        insertion_sort(arr_init, lth, arr_tmp2);
+        cnt_ins[i] = insertion_sort(arr_init, lth, arr_tmp2);
         end = clock();
         mesT_ins[i] = calculate_time(start, end);
 
         // ***  Selection sort  ***
+        memcpy(arr_tmp3, arr_init, sizeof(int)*lth);
         start = clock();
-        selection_sort(arr_init, lth, arr_tmp3);
+        cnt_sel[i] = selection_sort(arr_init, lth, arr_tmp3);
         end = clock();
         mesT_sel[i] = calculate_time(start, end);
-    }
 
-    //******* Sorting reserved ordered arrays of length L *******
-    for(int i = 0; i < FIVE; i++){
-        lth = arr_L[i];
-        int arr_init[lth], arr_tmp1[lth], arr_tmp2[lth], arr_tmp3[lth], arr_tmp4[lth];
-        rand_fill(arr_init, lth);
-        insrt_sort_descending(arr_init, lth, arr_tmp4);
+
+        //******* Sorting reserved ordered arrays of length L *******
+        int arr_tmp4[lth], arr_tmp5[lth], arr_tmp6[lth], arr_tmp7[lth];
+        memcpy(arr_tmp7, arr_init, sizeof(int)*lth);
+        insrt_sort_descending(arr_init, lth, arr_tmp7);
 
         // ***  Bubble sort  ***
+        memcpy(arr_tmp4, arr_tmp7, sizeof(int)*lth);
         start = clock();
-        bubble_sort(arr_tmp4, lth, arr_tmp1);
+        cnt_res_bub[i] = bubble_sort(arr_tmp7, lth, arr_tmp4);
         end = clock();
         mesT_bub_ord[i] = calculate_time(start, end);
 
         // ***  Insertion sort  ***
+        memcpy(arr_tmp5, arr_tmp7, sizeof(int)*lth);
         start = clock();
-        insertion_sort(arr_tmp4, lth, arr_tmp2);
+        cnt_res_ins[i] = insertion_sort(arr_tmp7, lth, arr_tmp5);
         end = clock();
         mesT_ins_ord[i] = calculate_time(start, end);
 
         // ***  Selection sort  ***
+        memcpy(arr_tmp6, arr_tmp7, sizeof(int)*lth);
         start = clock();
-        selection_sort(arr_tmp4, lth, arr_tmp3);
+        cnt_res_sel[i] = selection_sort(arr_tmp7, lth, arr_tmp6);
         end = clock();
         mesT_sel_ord[i] = calculate_time(start, end);
     }
+
+    // //******* Sorting reserved ordered arrays of length L *******
+    // for(int i = 0; i < FIVE; i++){
+    //     lth = arr_L[i];
+    //     int arr_init[lth], arr_tmp4[lth], arr_tmp5[lth], arr_tmp6[lth], arr_tmp7[lth];
+    //     rand_fill(arr_init, lth);
+    //     insrt_sort_descending(arr_init, lth, arr_tmp7);
+
+    //     // ***  Bubble sort  ***
+    //     memcpy(arr_tmp4, arr_tmp7, sizeof(int)*lth);
+    //     start = clock();
+    //     cnt_res_bub[i] = bubble_sort(arr_tmp7, lth, arr_tmp4);
+    //     end = clock();
+    //     mesT_bub_ord[i] = calculate_time(start, end);
+
+    //     // ***  Insertion sort  ***
+    //     memcpy(arr_tmp5, arr_tmp7, sizeof(int)*lth);
+    //     start = clock();
+    //     cnt_res_ins[i] = insertion_sort(arr_tmp7, lth, arr_tmp5);
+    //     end = clock();
+    //     mesT_ins_ord[i] = calculate_time(start, end);
+
+    //     // ***  Selection sort  ***
+    //     memcpy(arr_tmp6, arr_tmp7, sizeof(int)*lth);
+    //     start = clock();
+    //     cnt_res_sel[i] = selection_sort(arr_tmp7, lth, arr_tmp6);
+    //     end = clock();
+    //     mesT_sel_ord[i] = calculate_time(start, end);
+    // }
 
     //  exprime the results
     printf("\t\t\t\t     ******* Results *******\nBubble\t\tInsertion\tSelection\t|\tBubble\t\tInsertion\tSelection\n");
     printf("\t(randomly generated arrays)\t\t|\t\t(reserved ordered arrays)\n");
     for(int i = 0; i < FIVE; i++){
-        printf("%f\t%f\t%f\t|\t%f\t%f\t%f\n", mesT_bub[i], mesT_ins[i], mesT_sel[i]
-                , mesT_bub_ord[i], mesT_ins_ord[i], mesT_sel_ord[i]);
+        printf("%f(%d)\t%f(%d)\t%f(%d)\t|\t%f(%d)\t%f(%d)\t%f(%d)\n", mesT_bub[i], cnt_bub[i], mesT_ins[i], cnt_ins[i], mesT_sel[i]
+                , cnt_sel[i], mesT_bub_ord[i], cnt_res_bub[i], mesT_ins_ord[i], cnt_res_ins[i], mesT_sel_ord[i], cnt_res_sel[i]);
     }
     writeExcel(mesT_bub, mesT_ins, mesT_sel, mesT_bub_ord, mesT_ins_ord, mesT_sel_ord);
     return;
@@ -198,40 +238,71 @@ void measure_avg_time(){
 
 
 int main(){
-    unsigned int length = 10000;
+    unsigned int length = 4000;
     int array[length];
 
-    measure_avg_time();
+    // measure_avg_time();
 
-    // ****************************   Test of the function    ****************************
-    // rand_fill(array, length);
-    // printf("Initial array is: ");
+    // // ****************************   Test of the function    ****************************
+    rand_fill(array, length);
+    // printf("Initial array is: \n");
     // for(int i = 0; i < length; i++){
     //     printf("%d\t", array[i]);
     // }
     // printf("\n");
 
-    // // variables to measure the initial and final time of each run of function
-    // clock_t start, end;
-    // //variable to store the elapsed time
-    // double elapsed_time ;
+    // variables to measure the initial and final time of each run of function
+    clock_t start, end;
+    //variable to store the elapsed time
+    double elapsed_time ;
 
-    // //  *** Bubble sort ascending***
-    // int srtArr_bub[length];     //sorte array, by using bubble sort
-    // start = clock();
-    // bubble_sort(array, length, srtArr_bub);
-    // end = clock();
-    // printf("Bubble sorted array is: ");
+    //  *** Bubble sort ascending***
+    int srtArr_bub[length];     //sorte array, by using bubble sort
+    memcpy(srtArr_bub, array, sizeof(int)*length);
+    // printf("Initial array is: (COPIED)\n");
     // for(int i = 0; i < length; i++){
     //     printf("%d\t", srtArr_bub[i]);
     // }
     // printf("\n");
-    // elapsed_time = ((double)(end - start)) / CLOCKS_PER_SEC;
-    // elapsed_time *= 10e2;
-    // printf("Bubble sort function runs in %f ms\n\n", elapsed_time);
+    start = clock();
+    int buble_cnt = bubble_sort(array, length, srtArr_bub);
+    end = clock();
+    // printf("*** randomly ordered    ***\n");
+    // printf("Bubble sorted array is: \n");
+    // for(int i = 0; i < length; i++){
+    //     printf("%d\t", srtArr_bub[i]);
+    // }
+    // printf("\n");
+    elapsed_time = ((double)(end - start)) / CLOCKS_PER_SEC;
+    elapsed_time *= 10e2;
+    printf("Bubble sort function runs in %f ms\t(it makes %d times of switch).\n\n", elapsed_time, buble_cnt);
+
+    // ***  Bubble sort with reserved ordered   ***
+    int resered_initArr[length];
+    printf("*** reserved ordered   ***\n");
+    memcpy(resered_initArr, array, sizeof(int)*length);
+    insrt_sort_descending(array, length, resered_initArr);
+    // printf("Reserved ordered array is: \n");
+    // for(int i = 0; i < length; i++){
+    //     printf("%d\t", resered_initArr[i]);
+    // }
+    // printf("\n");
+    start = clock();
+    int buble_ord_cnt = bubble_sort(array, length, resered_initArr);
+    end = clock();
+    // printf("Bubble sorted array is: \n");
+    // for(int i = 0; i < length; i++){
+    //     printf("%d\t", resered_initArr[i]);
+    // }
+    // printf("\n");
+    elapsed_time = ((double)(end - start)) / CLOCKS_PER_SEC;
+    elapsed_time *= 10e2;
+    printf("Bubble sort function runs in %f ms\t(it makes %d times of switch).\n\n", elapsed_time, buble_ord_cnt);
+
 
     // //  *** Insertion sort ascending***
     // int srtArr_ins[length];     //sorte array, by using insertion sort
+    // memcpy(srtArr_ins, array, sizeof(int)*length);
     // start = clock();
     // insertion_sort(array, length, srtArr_ins);
     // end = clock();
@@ -246,6 +317,7 @@ int main(){
 
     // //  *** Selection sort ascending***
     // int srtArr_sel[length];     //sorte array, by using selection sort
+    // memcpy(srtArr_sel, array, sizeof(int)*length);
     // start = clock();
     // selection_sort(array, length, srtArr_sel);
     // end = clock();
