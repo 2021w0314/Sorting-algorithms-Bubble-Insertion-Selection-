@@ -27,12 +27,13 @@ void swap(int* a, int* b){
     *b = tmp;
 }
 
-void writeExcel(double* mesT_bub, double* mesT_ins, double* mesT_sel,
-                 double* mesT_bub_ord, double* mesT_ins_ord, double* mesT_sel_ord){
+void writeExcel(double* mesT_bub, double* mesT_ins, double* mesT_sel, double* mesT_qck, double* mesT_heap,
+                 double* mesT_bub_ord, double* mesT_ins_ord, double* mesT_sel_ord, double* mesT_qck_ord, double* mesT_heap_ord){
     FILE* f = fopen("./testGraphe.txt", "w");
     for(int i = 0; i < FIVE; i++){
-        fprintf(f, "%f\t%f\t%f\t%f\t%f\t%f\n", mesT_bub[i], mesT_ins[i], mesT_sel[i], 
-                    mesT_bub_ord[i], mesT_ins_ord[i], mesT_sel_ord[i]);
+        fprintf(f, "%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", 
+                    mesT_bub[i], mesT_ins[i], mesT_sel[i], mesT_qck[i], mesT_heap[i],
+                    mesT_bub_ord[i], mesT_ins_ord[i], mesT_sel_ord[i], mesT_qck_ord[i], mesT_heap_ord[i]);
     }
     fclose(f);
 }
@@ -197,14 +198,15 @@ void measure_avg_time(){
     int lth;    // length L
     clock_t start, end;     // initial and final time of each run of functions
     // arrays to store the measure of time 
-    double mesT_bub[FIVE], mesT_ins[FIVE], mesT_sel[FIVE];
-    double mesT_bub_ord[FIVE], mesT_ins_ord[FIVE], mesT_sel_ord[FIVE];
-    int cnt_bub[FIVE], cnt_ins[FIVE], cnt_sel[FIVE], cnt_res_bub[FIVE], cnt_res_ins[FIVE], cnt_res_sel[FIVE];    //  counter of switchs
+    double mesT_bub[FIVE], mesT_ins[FIVE], mesT_sel[FIVE], mesT_qck[FIVE], mesT_heap[FIVE];
+    double mesT_bub_ord[FIVE], mesT_ins_ord[FIVE], mesT_sel_ord[FIVE], mesT_qck_ord[FIVE], mesT_heap_ord[FIVE];
+    int cnt_bub[FIVE], cnt_ins[FIVE], cnt_sel[FIVE], cnt_qck[FIVE], cnt_heap[FIVE], cnt_res_bub[FIVE], cnt_res_ins[FIVE], cnt_res_sel[FIVE], cnt_res_qck[FIVE], cnt_res_heap[FIVE];    //  counter of switchs
 
     for(int i = 0; i < FIVE; i++){
         //******* Sorting randomly generated arrays of length L *******
         lth = arr_L[i];
-        int arr_init[lth], arr_tmp1[lth], arr_tmp2[lth], arr_tmp3[lth];
+        //  arr_tmp1 <-> bubble_sort;   arr_tmp2 <-> insertion;     arr_tmp3 <-> selection;     arr_tmpA <-> quick;     arr_tmpB <-> heap
+        int arr_init[lth], arr_tmp1[lth], arr_tmp2[lth], arr_tmp3[lth], arr_tmpA[lth], arr_tmpB[lth];
         rand_fill(arr_init, lth);
         // printf("\nInitial array is: ");
         // for(int i = 0; i < lth; i++){
@@ -233,9 +235,25 @@ void measure_avg_time(){
         end = clock();
         mesT_sel[i] = calculate_time(start, end);
 
+        // ***  Quick sort  ***
+        memcpy(arr_tmpA, arr_init, sizeof(int)*lth);
+        start = clock();
+        cnt_qck[i] = quickSort(arr_tmpA, 0, lth, 0);
+        end = clock();
+        mesT_qck[i] = calculate_time(start, end);
+
+        // ***  Heap sort  ***
+        memcpy(arr_tmpB, arr_init, sizeof(int)*lth);
+        start = clock();
+        cnt_heap[i] = heapSort(arr_tmpB, lth, 0);
+        end = clock();
+        mesT_heap[i] = calculate_time(start, end);
+
 
         //******* Sorting reserved ordered arrays of length L *******
-        int arr_tmp4[lth], arr_tmp5[lth], arr_tmp6[lth], arr_tmp7[lth];
+        //  arr_tmp4 <-> buble_res;     arr_tmp5 <-> insert_res;    arr_tmp6 <-> select_res;    arr_tmpC <-> quick_res;     arr_tmpD <-> heap_res
+        //  arr_tmp7 <-> arr_init_res
+        int arr_tmp4[lth], arr_tmp5[lth], arr_tmp6[lth], arr_tmp7[lth], arr_tmpC[lth], arr_tmpD[lth];
         memcpy(arr_tmp7, arr_init, sizeof(int)*lth);
         insrt_sort_descending(arr_init, lth, arr_tmp7);
 
@@ -259,6 +277,20 @@ void measure_avg_time(){
         cnt_res_sel[i] = selection_sort(arr_tmp7, lth, arr_tmp6);
         end = clock();
         mesT_sel_ord[i] = calculate_time(start, end);
+
+        // ***  Quick sort  ***
+        memcpy(arr_tmpC, arr_init, sizeof(int)*lth);
+        start = clock();
+        cnt_res_heap[i] = quickSort(arr_tmpC, 0, lth, 0);
+        end = clock();
+        mesT_qck_ord[i] = calculate_time(start, end);
+
+        // ***  Heap sort  ***
+        memcpy(arr_tmpD, arr_init, sizeof(int)*lth);
+        start = clock();
+        cnt_res_heap[i] = heapSort(arr_tmpD, lth, 0);
+        end = clock();
+        mesT_heap_ord[i] = calculate_time(start, end);
     }
 
     // //******* Sorting reserved ordered arrays of length L *******
@@ -291,76 +323,100 @@ void measure_avg_time(){
     // }
 
     //  exprime the results
-    printf("\t\t\t\t     ******* Results *******\nBubble\t\tInsertion\tSelection\t|\tBubble\t\tInsertion\tSelection\n");
-    printf("\t(randomly generated arrays)\t\t|\t\t(reserved ordered arrays)\n");
+    printf("\t\t\t\t     ******* Results *******\nBubble\t\tInsertion\tSelection\tQuicksort\tHeapsort\t|\tBubble\t\tInsertion\tSelection\tQuicksort\tHeapsort\n");
+    printf("\t\t\t(randomly generated arrays)\t\t\t\t|\t\t\t(reserved ordered arrays)\n");
     for(int i = 0; i < FIVE; i++){
-        printf("%f(%d)\t%f(%d)\t%f(%d)\t|\t%f(%d)\t%f(%d)\t%f(%d)\n", mesT_bub[i], cnt_bub[i], mesT_ins[i], cnt_ins[i], mesT_sel[i]
-                , cnt_sel[i], mesT_bub_ord[i], cnt_res_bub[i], mesT_ins_ord[i], cnt_res_ins[i], mesT_sel_ord[i], cnt_res_sel[i]);
+        printf("%f(%d)\t%f(%d)\t%f(%d)\t%f(%d)\t%f(%d)\t|\t%f(%d)\t%f(%d)\t%f(%d)\t%f(%d)\t%f(%d)\n"
+                , mesT_bub[i], cnt_bub[i], mesT_ins[i], cnt_ins[i], mesT_sel[i], cnt_sel[i]
+                , mesT_qck[i], cnt_qck[i], mesT_heap[i], cnt_heap[i]
+                , mesT_bub_ord[i], cnt_res_bub[i], mesT_ins_ord[i], cnt_res_ins[i], mesT_sel_ord[i], cnt_res_sel[i]
+                , mesT_qck_ord[i], cnt_res_qck[i], mesT_heap_ord[i], cnt_res_heap[i]);
     }
-    writeExcel(mesT_bub, mesT_ins, mesT_sel, mesT_bub_ord, mesT_ins_ord, mesT_sel_ord);
+    writeExcel(mesT_bub, mesT_ins, mesT_sel, mesT_qck, mesT_heap, 
+                mesT_bub_ord, mesT_ins_ord, mesT_sel_ord, mesT_qck_ord, mesT_heap_ord);
     return;
 }
 
 int main(){
 
-    measure_avg_time();
+    // measure_avg_time();
 
-    // // ****************************   Test of the function    ****************************
-    // unsigned int length = 10;
-    // int array[length];
-    // rand_fill(array, length);
+    // ****************************   Test of the function    ****************************
+    unsigned int length = 20000;
+    int array[length];
+    rand_fill(array, length);
     // printf("Initial array is: \n");
     // for(int i = 0; i < length; i++){
     //     printf("%d\t", array[i]);
     // }
     // printf("\n");
 
-    // // variables to measure the initial and final time of each run of function
-    // clock_t start, end;
-    // //variable to store the elapsed time
-    // double elapsed_time ;
+    // variables to measure the initial and final time of each run of function
+    clock_t start, end;
+    //variable to store the elapsed time
+    double elapsed_time ;
 
-    // //  *** Quick sort ascending***
-    // int srtArr_quick[length];     //sorte array, by using Quick Sort
-    // memcpy(srtArr_quick, array, sizeof(int)*length);
-    // // printf("Initial array is: (COPIED)\n");
-    // // for(int i = 0; i < length; i++){
-    // //     printf("%d\t", srtArr_quick[i]);
-    // // }
-    // // printf("\n");
-    // start = clock();
-    // int quickSort_cnt = quickSort(srtArr_quick, 0, length, 0);
-    // end = clock();
-    // printf("***     randomly ordered    ***\n");
+    //  *** Quick sort ascending***
+    int srtArr_quick[length];     //sorte array, by using Quick Sort
+    memcpy(srtArr_quick, array, sizeof(int)*length);
+    // printf("Initial array is: (COPIED)\n");
+    // for(int i = 0; i < length; i++){
+    //     printf("%d\t", srtArr_quick[i]);
+    // }
+    // printf("\n");
+    start = clock();
+    int quickSort_cnt = quickSort(srtArr_quick, 0, length, 0);
+    end = clock();
+    printf("***     randomly ordered    ***\n");
     // printf("Quick sorted array is: \n");
     // for(int i = 0; i < length; i++){
     //     printf("%d\t", srtArr_quick[i]);
     // }
     // printf("\n");
-    // elapsed_time = ((double)(end - start)) / CLOCKS_PER_SEC;
-    // elapsed_time *= 10e2;
-    // printf("Quick sort function runs in %f ms\t(it makes %d times of switch).\n\n", elapsed_time, quickSort_cnt);
+    elapsed_time = ((double)(end - start)) / CLOCKS_PER_SEC;
+    elapsed_time *= 10e2;
+    printf("Quick sort function runs in %f ms\t(it makes %d times of switch).\n\n", elapsed_time, quickSort_cnt);
 
-    // //  *** Heap sort ascending***
-    // int srtArr_heap[length];     //sorte array, by using Quick Sort
-    // memcpy(srtArr_heap, array, sizeof(int)*length);
-    // // printf("Initial array is: (COPIED)\n");
-    // // for(int i = 0; i < length; i++){
-    // //     printf("%d\t", srtArr_quick[i]);
-    // // }
-    // // printf("\n");
-    // start = clock();
-    // int heapSort_cnt = heapSort(srtArr_heap, length, 0);
-    // end = clock();
+    //  *** Heap sort ascending***
+    int srtArr_heap[length];     //sorte array, by using Quick Sort
+    memcpy(srtArr_heap, array, sizeof(int)*length);
+    // printf("Initial array is: (COPIED)\n");
+    // for(int i = 0; i < length; i++){
+    //     printf("%d\t", srtArr_quick[i]);
+    // }
+    // printf("\n");
+    start = clock();
+    int heapSort_cnt = heapSort(srtArr_heap, length, 0);
+    end = clock();
     // printf("Heap sorted array is: \n");
     // for(int i = 0; i < length; i++){
     //     printf("%d\t", srtArr_heap[i]);
     // }
     // printf("\n");
-    // elapsed_time = ((double)(end - start)) / CLOCKS_PER_SEC;
-    // elapsed_time *= 10e2;
-    // printf("Heap sort function runs in %f ms\t(it makes %d times of switch).\n\n", elapsed_time, heapSort_cnt);
+    elapsed_time = ((double)(end - start)) / CLOCKS_PER_SEC;
+    elapsed_time *= 10e2;
+    printf("Heap sort function runs in %f ms\t(it makes %d times of switch).\n\n", elapsed_time, heapSort_cnt);
 
+
+    //  *** Insertion sort ascending***
+    int srtArr_ins[length];     //sorte array, by using Quick Sort
+    memcpy(srtArr_ins, array, sizeof(int)*length);
+    // printf("Initial array is: (COPIED)\n");
+    // for(int i = 0; i < length; i++){
+    //     printf("%d\t", srtArr_quick[i]);
+    // }
+    // printf("\n");
+    start = clock();
+    int insert_cnt = insertion_sort(array, length, srtArr_ins);
+    end = clock();
+    // printf("Heap sorted array is: \n");
+    // for(int i = 0; i < length; i++){
+    //     printf("%d\t", srtArr_heap[i]);
+    // }
+    // printf("\n");
+    elapsed_time = ((double)(end - start)) / CLOCKS_PER_SEC;
+    elapsed_time *= 10e2;
+    printf("Insertion sort function runs in %f ms\t(it makes %d times of switch).\n\n", elapsed_time, insert_cnt);
 
     // // ***  with reserved ordered   ***
     // int resered_initArr[length];
